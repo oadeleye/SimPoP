@@ -1,0 +1,68 @@
+Packages needed to run the codes  and how to install in R:
+library ("igraph")/// install.packages("igraph")
+library ("ggplot2")///install.packages("ggplot2")
+
+
+
+
+R Files:
+There 3 R-files....
+1. ps_closest.R : This is the original code from the authors... I only use the closest connection part.
+## ....the original file without edit is included as Orginal.R......#####
+
+2. ps_closest_rwr.R : This the modifiled file that uses our data as delta.
+ It works with two other files:
+ a. real_rwr.csv: this is real similarity matrix. (note seperator is ;)
+ b. test_mat.txt: this is the test matrix of 8X8
+ 
+ 
+ 1.
+ Running ps_closest:
+ net <- ps_model(100, 4, 3, 0)
+ #takes 4 parameters
+  @param N integer; The number of desired nodes for the network .
+  @param avg.k numeric; The target average node degree 
+  @param gma numeric; The target scaling exponent of the network's node degree distribution 
+  @param Temp numeric; The network temperature, controlling the target clustering coefficient (default = 0)
+  
+  
+  Returns:
+ list of network = net, polar = nodes
+ network is a graph_from_adjacency_matrix, while
+ polar is a data frame that contains r and theta ( Note: r=log(t) and theta is uniform distribution generate between 0 and pi)
+ 
+ 
+ 2.
+ 
+ Runing ps_closest_rwr:
+  net <- net<-ps_model2(1284,4,3) # when the real data is used
+  net <- net<-ps_model2(8,4,3) # when the test data is used
+ 
+  #takes 3 parameters
+  @param N integer; The number of desired nodes for the network .
+  @param avg.k numeric; The target average node degree 
+  @param gma numeric; The target scaling exponent of the network's node degree distribution 
+ 
+ Returns:
+ list of network = net, polar = nodes
+ network is a graph_from_adjacency_matrix, while
+ polar is a data frame that contains r and theta ( Note: r=log(t) and theta is replced by similarity matrix)
+
+ 
+ Utility functions:
+ Both R files use thesame utility except in ps_closest_rwr that uses a read_matrix() functions for reading similarity data.
+ 1. check_ps_parameters(N, avg.k, gma, Temp)//  Make sure that all parameters are valid
+ 2.log_seq <- function(s, e, n)//Generate a log10-linearly spaced sequence
+ 3.plot_degree_distr <- function(network, bins = 100)//plot degree distibution
+	how to run : 
+		net<-ps_model2(1284,4,3)
+		plot_degree_distr(net$network, bins = 50)
+		
+		
+		
+		
+Additional Files:
+1.graph_for_ps_model1_1200nodes.png// the degree distibution graph for ps_closest
+2. graph_for_ps_model2_rwr_1280nodes// the degree distibution graph for ps_closest_rwr with the real data
+3. test.mat.txt
+4. the python degree distibution for similar procedure.
