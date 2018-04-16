@@ -38,7 +38,7 @@ ps_model1 <- function(N = 10, avg.k = 4, gma = 3, Temp = 0){
     nodes$r[t] <- 2*log(t)
 
     nodes$theta[t] <- stats::runif(1, min = 0, max = 2*pi)
-    
+    #nodes$theta[t] <- 1
     
     # Hyperbolic distance between new node and all existing nodes
     d <- hyperbolic_dist(nodes[t, ], nodes[1:(t - 1), ])

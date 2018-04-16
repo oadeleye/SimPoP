@@ -1,34 +1,47 @@
 library ("igraph")
 library ("ggplot2")
+library("wordspace")
+library("matrixLaplacian")
 
 #set path to the location of your code and data
-setwd("C:/Users/oadeleye/Desktop/Backup/Pictures")
+setwd("C:/Users/jiyu/Documents/GitHub/Simpop-ola")
 
 
 
 # Read and Process matrix
 read_matrix<-function() {
   # Make sure that all parameters are valid
-  # data<-read.table("real_rwr.csv", header=FALSE, sep=";")  #uncomment this to run the real data as theta
-  data<-read.table("test_mat.txt", header=FALSE, sep=",")
+  data<-read.table("real_rwr.csv", header=FALSE, sep=";")  #uncomment this to run the real data as theta
+  #data<-read.table("test_mat.txt", header=FALSE, sep=",")
   rwr_mat<-as.matrix(data)
-  diag(rwr_mat) <-0 # set rwr_mat
-  N=nrow(rwr_mat)
-  rwr_mat<-rwr_mat%*%diag(1/colSums(rwr_mat)) # normalisation of rwr matirx
-  one_mat <- matrix(1/(N-1), ncol = N, nrow = N) # generate 1/n-1 uniform matrix
-  diag(one_mat) <- 0  # set uniform matrix  diagonal to zero
-  sim_mat<-  rwr_mat+one_mat # Sum rwr matrix and uniform matrix
-  sim_matrix1<-sim_mat/2 # divide summation matrix by 2
-  one_minus <- matrix(1, ncol = N, nrow = N)
-  sim_matrix<-one_minus-sim_matrix1 # One minus Trick
-  diag(sim_matrix) <- 0 #set diagonal to 0
-  return(sim_matrix)
+  rwr_mat <- matrixLaplacian(rwr_mat)
+  rwr_mat <- rwr_mat$LaplacianMatrix
+  rwr_mat <- rwr_mat*-1
+  diag(rwr_mat) <-0 
+  
+  rwr_mat <- rwr_mat/max(rwr_mat)
+  rwr_mat <- 1 - rwr_mat
+  rwr_mat <- pi*rwr_mat
+  
+  #N=nrow(rwr_mat)
+  #rwr_mat<-rwr_mat%*%diag(1/colSums(rwr_mat)) # normalisation of rwr matirx
+  #one_mat <- matrix(1/(N-1), ncol = N, nrow = N) # generate 1/n-1 uniform matrix
+  #diag(one_mat) <- 0  # set uniform matrix  diagonal to zero
+  #sim_mat<-  rwr_mat+one_mat # Sum rwr matrix and uniform matrix
+  #sim_matrix1<-sim_mat/2 # divide summation matrix by 2
+  #one_minus <- matrix(1, ncol = N, nrow = N)
+  #sim_matrix<-one_minus-sim_matrix1 # One minus Trick
+  #diag(sim_matrix) <- 0 #set diagonal to 0
+  return(rwr_mat)
 }
 
 
 ps_model2 <- function(N = 8, avg.k = 2, gma = 3){
   #read sim data.....
-  sim<-read_matrix()
+  #sim<-read_matrix()
+  sim<-matrix(rexp(400, rate=.1), ncol=20)
+  sim<-normalize.rows(sim)*pi
+  
   
   # Make sure that all parameters are valid
   check_ps_parameters(N, avg.k, gma)
@@ -41,7 +54,10 @@ ps_model2 <- function(N = 8, avg.k = 2, gma = 3){
   nodes <- data.frame(r = vector("numeric", length = N), theta = vector("numeric", length = N))
   
   nodes$r[1] <- 0 # add frist node 
-  nodes$theta[1] <- stats::runif(1, min = 0, max = pi)# give a random pi to the first node 
+  
+  # the following line is not needed as we can get the delta of theta from the similarity matrix
+  #nodes$theta[1] <- stats::runif(1, min = 0, max = pi)# give a random pi to the first node 
+  
   
  # Initialise the network adjacency matrix
   net <- matrix(0, nrow = N, ncol = N)
@@ -85,8 +101,10 @@ ps_model2 <- function(N = 8, avg.k = 2, gma = 3){
 
 hyperbolic_dist <- function(ZI,ZJ,sim,t){ #s=t-1
   
+  # print(t)
   # delta <- pi* ZJ$theta # Angular separation between points
-  delta<- sim[(t),1:(t-1)]*pi
+  # delta<- sim[(t),1:(t-1)]
+  delta <- rep(1,t-1)
   d <- cosh(ZI$r)*cosh(ZJ$r) - sinh(ZI$r)*sinh(ZJ$r)*cos(delta)
   
   # Due to precision problems, numbers d < 1 should be set to 1 to get the right final hyperbolic distance of 0
