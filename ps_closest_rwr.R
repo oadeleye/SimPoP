@@ -16,15 +16,29 @@ read_and_normalized_matrix<-function() {
   rwr_mat<-as.matrix(data)
 
   
+  #normalize to symetric Laplacian
   rwr_mat <- matrixLaplacian(rwr_mat)
   rwr_mat <- rwr_mat$LaplacianMatrix
   rwr_mat <- rwr_mat*-1
+
+  #ignore self similarity
   diag(rwr_mat) <-0 
   
+  #scale to 0..1 (divided by max)
   rwr_mat <- rwr_mat/max(rwr_mat)
+  
+  # convert to distance matrix: large number means small similarity
   rwr_mat <- 1 - rwr_mat
   
   return(rwr_mat)
+}
+
+write_matrix<- function(rwr_mat){
+  
+  write.table(rwr_mat, file = "normalized_rwr.csv",row.names=FALSE, na="",col.names=FALSE, sep=",")
+  
+  # to include column heading, use the following
+  write.csv(rwr_mat, file = "normalized_rwr.csv", row.names = FALSE)
 }
 
 
